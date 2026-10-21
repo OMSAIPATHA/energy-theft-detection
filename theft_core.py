@@ -289,7 +289,7 @@ def run_models(feats, labels=None, threshold=0.5, contamination=0.10):
             out["warnings"].append(f"Only {n_pos} theft / {n_neg} normal labels - need at least 10 of each "
                                    "to train. Using the unsupervised Isolation Forest instead.")
 
-    X = data[FEATURES].values
+    X = data[FEATURES].to_numpy(dtype=float)       # plain NumPy arrays: safe on every pandas version
     Xs_all = StandardScaler().fit_transform(X)
 
     # Isolation Forest on everyone (works without labels)
@@ -298,8 +298,8 @@ def run_models(feats, labels=None, threshold=0.5, contamination=0.10):
     data["anomaly_score"] = (raw_s - raw_s.min()) / (raw_s.max() - raw_s.min() + EPS)
 
     if out["mode"] == "supervised":
-        y = data.is_theft.values
-        ids = data.consumer_id.values
+        y = data.is_theft.to_numpy(dtype=int)
+        ids = data.consumer_id.astype(str).to_numpy(dtype=object)
         X_tr, X_te, y_tr, y_te, id_tr, id_te = train_test_split(
             X, y, ids, test_size=0.30, stratify=y, random_state=SEED)
         sc = StandardScaler().fit(X_tr)
